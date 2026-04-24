@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is part of Modelo303 plugin for FacturaScripts
- * Copyright (C) 2017-2025 Carlos Garcia Gomez <carlos@facturascripts.com>
+ * Copyright (C) 2017-2026 Carlos Garcia Gomez <carlos@facturascripts.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -44,6 +44,7 @@ class PartidaImpuestoResumen extends JoinModel
 
             'codcuentaesp' => 'COALESCE(subcuentas.codcuentaesp, cuentas.codcuentaesp)',
             'tipo_desc' => 'cuentasesp.descripcion',
+            'operacion' => 'COALESCE(facturasprov.operacion, facturascli.operacion)',
 
             'baseimponible' => $this->sqlForRoundedSum('partidas.baseimponible'),
             'debe' => $this->sqlForRoundedSum('partidas.debe'),
@@ -65,7 +66,8 @@ class PartidaImpuestoResumen extends JoinModel
             . ', partidas.recargo'
             . ', subcuentas.descripcion'
             . ', COALESCE(subcuentas.codcuentaesp, cuentas.codcuentaesp)'
-            . ', cuentasesp.descripcion';
+            . ', cuentasesp.descripcion'
+            . ', COALESCE(facturasprov.operacion, facturascli.operacion)';
     }
 
     /**
@@ -80,7 +82,9 @@ class PartidaImpuestoResumen extends JoinModel
             . ' INNER JOIN subcuentas on subcuentas.idsubcuenta = partidas.idsubcuenta'
             . ' INNER JOIN cuentas on cuentas.idcuenta = subcuentas.idcuenta'
             . ' LEFT JOIN cuentasesp on cuentasesp.codcuentaesp = coalesce(subcuentas.codcuentaesp, cuentas.codcuentaesp)'
-            . ' LEFT JOIN series on series.codserie = partidas.codserie';
+            . ' LEFT JOIN series on series.codserie = partidas.codserie'
+            . ' LEFT JOIN facturasprov on facturasprov.codigo = asientos.documento'
+            . ' LEFT JOIN facturascli on facturascli.codigo = asientos.documento';
     }
 
     /**
@@ -97,6 +101,8 @@ class PartidaImpuestoResumen extends JoinModel
             'cuentas',
             'cuentasesp',
             'series',
+            'facturasprov',
+            'facturascli',
         ];
     }
 

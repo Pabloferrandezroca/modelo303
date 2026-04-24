@@ -21,6 +21,7 @@ namespace FacturaScripts\Plugins\Modelo303\Lib;
 
 use FacturaScripts\Core\Base\DataBase;
 use FacturaScripts\Core\Tools;
+use FacturaScripts\Dinamic\Lib\InvoiceOperation;
 use FacturaScripts\Dinamic\Model\Ejercicio;
 use FacturaScripts\Dinamic\Model\Join\PartidaImpuestoResumen;
 
@@ -61,8 +62,6 @@ class Modelo303
         // Adquisiciones intracomunitarias
         'IVARUE' => ['21' => ['base' => '10', 'cuota' => '11']],
 
-        // Operaciones con inversión del sujeto pasivo
-        // TODO: 'xxxxx' =>  ['21' => ['base' => '12', 'cuota' => '13']],
 
         // Recargo de equivalencia
         'IVARRE' => [
@@ -154,6 +153,7 @@ class Modelo303
         foreach ($resumen as $item) {
             $this->addMovimiento(
                 $item->codcuentaesp ?? '',
+                $item->operacion ?? '',
                 (float) $item->iva,
                 (float) $item->recargo,
                 (float) $item->baseimponible,
@@ -182,20 +182,23 @@ class Modelo303
         ];
     }
 
-    /**
-     * Add a tax movement to the model (base + quota by type and rate)
-     * - Determine the correct square based on the type and tax rate.
-     * - Update the base and quota squares accordingly.
-     *
-     * @param string $tipo
-     * @param float $iva
-     * @param float $recargo
-     * @param float $base
-     * @param float $cuota
-     * @return void
-     */
-    private function addMovimiento(string $tipo, float $iva, float $recargo, float $base, float $cuota): void
+    private function addMovimiento(string $tipo, string $operacion, float $iva, float $recargo, float $base, float $cuota): void
     {
+        // ISP: inversión del sujeto pasivo (no-UE, servicios intracomunitarios B2B, doméstico art. 84)
+        // Devengado → casillas 12-13 / deducible → casillas 28-29
+        if (in_array($operacion, [InvoiceOperation::REVERSE_CHARGE, InvoiceOperation::INTRA_COMMUNITY_SERVICES])) {
+            if (in_array($tipo, ['IVAREP', 'IVARUE'])) {
+                $this->square['12'] += $base;
+                $this->square['13'] += $cuota;
+                return;
+            }
+            if (in_array($tipo, ['IVASOP', 'IVASUE'])) {
+                $this->square['28'] += $base;
+                $this->square['29'] += $cuota;
+                return;
+            }
+        }
+
         if (false === isset($this->casillaMap[$tipo])) {
             return;
         }
