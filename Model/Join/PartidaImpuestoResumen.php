@@ -83,8 +83,8 @@ class PartidaImpuestoResumen extends JoinModel
             . ' INNER JOIN cuentas on cuentas.idcuenta = subcuentas.idcuenta'
             . ' LEFT JOIN cuentasesp on cuentasesp.codcuentaesp = coalesce(subcuentas.codcuentaesp, cuentas.codcuentaesp)'
             . ' LEFT JOIN series on series.codserie = partidas.codserie'
-            . ' LEFT JOIN facturasprov on facturasprov.codigo = asientos.documento'
-            . ' LEFT JOIN facturascli on facturascli.codigo = asientos.documento';
+            . ' LEFT JOIN (SELECT codigo, operacion FROM facturasprov) facturasprov on facturasprov.codigo = asientos.documento'
+            . ' LEFT JOIN (SELECT codigo, operacion FROM facturascli) facturascli on facturascli.codigo = asientos.documento';
     }
 
     /**

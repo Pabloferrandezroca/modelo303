@@ -68,7 +68,7 @@ class ComprobarFechaDevengoTest extends Modelo303TestCase
         $partidaImpuestoResumen = new PartidaImpuestoResumen();
         $partida = $partidaImpuestoResumen->all([
             new DataBaseWhere('COALESCE(subcuentas.codcuentaesp, cuentas.codcuentaesp)', 'IVAREP'),
-            new DataBaseWhere('fecha', Tools::date()),
+            new DataBaseWhere('asientos.fecha', Tools::date()),
         ])[0];
         $this->assertEquals($invoiceFechaHoy->totaliva, $partida->cuotaiva);
         $this->assertEquals($invoiceFechaHoy->totaliva, $partida->haber);
@@ -77,7 +77,7 @@ class ComprobarFechaDevengoTest extends Modelo303TestCase
         $partidaImpuestoResumen = new PartidaImpuestoResumen();
         $partida = $partidaImpuestoResumen->all([
             new DataBaseWhere('COALESCE(subcuentas.codcuentaesp, cuentas.codcuentaesp)', 'IVAREP'),
-            new DataBaseWhere('fecha', Tools::date('-1 month')),
+            new DataBaseWhere('asientos.fecha', Tools::date('-1 month')),
         ])[0];
         $this->assertEquals($invoiceFechaDevengoAnterior->totaliva, $partida->cuotaiva);
         $this->assertEquals($invoiceFechaDevengoAnterior->totaliva, $partida->haber);
@@ -86,7 +86,7 @@ class ComprobarFechaDevengoTest extends Modelo303TestCase
         $partidaImpuestoResumen = new PartidaImpuestoResumen();
         $partida = $partidaImpuestoResumen->all([
             new DataBaseWhere('COALESCE(subcuentas.codcuentaesp, cuentas.codcuentaesp)', 'IVAREP'),
-            new DataBaseWhere('fecha', Tools::date('+1 month')),
+            new DataBaseWhere('asientos.fecha', Tools::date('+1 month')),
         ])[0];
         $this->assertEquals($invoiceFechaDevengoPosterior->totaliva, $partida->cuotaiva);
         $this->assertEquals($invoiceFechaDevengoPosterior->totaliva, $partida->haber);
